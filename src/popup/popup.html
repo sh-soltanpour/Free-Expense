@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Free Expense</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <label class="switch">
+      <input type="checkbox" id="masterToggle">
+      <span class="switch-track"></span>
+      <span class="switch-label" id="masterLabel">Interception on</span>
+    </label>
+    <span class="count" id="hitCount"></span>
+  </header>
+
+  <p class="context" id="context"></p>
+
+  <ul class="rules" id="ruleList"></ul>
+  <p class="empty" id="emptyState" hidden>No rules yet.</p>
+
+  <footer>
+    <button id="openOptions" class="btn btn-primary">Edit rules</button>
+  </footer>
+
+  <template id="ruleTemplate">
+    <li class="rule">
+      <label class="switch switch-sm">
+        <input type="checkbox" data-field="enabled">
+        <span class="switch-track"></span>
+      </label>
+      <span class="rule-text">
+        <span class="rule-name"></span>
+        <span class="rule-url"></span>
+      </span>
+      <span class="badge" data-role="match" hidden>here</span>
+    </li>
+  </template>
+
+  <script src="../engine.js"></script>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

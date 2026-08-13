@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Free Expense",
+  "version": "1.0.0",
+  "description": "Intercept fetch/XHR responses and rewrite fields in the returned JSON with your own rules.",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Free Expense",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "src/options/options.html",
+  "commands": {
+    "reload-extension": {
+      "suggested_key": { "default": "Alt+Shift+R" },
+      "description": "Reload the extension and refresh the current tab"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN",
+      "js": ["src/engine.js", "src/interceptor.js"]
+    },
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "ISOLATED",
+      "js": ["src/bridge.js"]
+    }
+  ]
+}

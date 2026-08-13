@@ -1,0 +1,11 @@
+{
+  "name": "free-expense",
+  "version": "1.0.0",
+  "description": "Chrome extension that rewrites JSON fields in fetch/XHR responses using user-defined rules.",
+  "private": true,
+  "scripts": {
+    "test": "node tools/test_engine.js && node tools/test_interceptor.js",
+    "icons": "python3 tools/make_icons.py",
+    "package": "bash tools/package.sh"
+  }
+}

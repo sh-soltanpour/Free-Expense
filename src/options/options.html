@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Free Expense — Rules</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../../icons/icon32.png" alt="" width="24" height="24">
+      <h1>Free Expense</h1>
+    </div>
+    <div class="topbar-actions">
+      <span id="saveState" class="save-state" aria-live="polite"></span>
+      <label class="switch" title="Pause every rule without deleting anything">
+        <input type="checkbox" id="masterToggle">
+        <span class="switch-track"></span>
+        <span class="switch-label">Interception on</span>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="toolbar">
+      <button id="addRule" class="btn btn-primary">+ New rule</button>
+      <div class="spacer"></div>
+      <button id="exportRules" class="btn">Export</button>
+      <button id="importRules" class="btn">Import</button>
+      <button id="restoreDefaults" class="btn">Restore defaults</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </section>
+
+    <section id="ruleList" class="rules"></section>
+
+    <p id="emptyState" class="empty" hidden>
+      No rules yet. Hit <strong>New rule</strong> to add one.
+    </p>
+
+    <section class="tester">
+      <h2>Try a rule out</h2>
+      <p class="muted">
+        Paste a URL and a sample response body to see exactly which rules fire and what the
+        page would end up receiving. Nothing here touches your live rules.
+      </p>
+      <div class="tester-grid">
+        <label class="field">
+          <span>Request URL</span>
+          <input type="text" id="testUrl" placeholder="https://httpbin.org/json">
+        </label>
+        <label class="field field-narrow">
+          <span>Method</span>
+          <select id="testMethod"></select>
+        </label>
+      </div>
+      <div class="tester-grid tester-panes">
+        <label class="field">
+          <span>Response body (JSON)</span>
+          <textarea id="testInput" rows="12" spellcheck="false">{
+  "test": false,
+  "items": [
+    { "id": 1, "active": false },
+    { "id": 2, "active": false }
+  ]
+}</textarea>
+        </label>
+        <label class="field">
+          <span>What the page receives</span>
+          <textarea id="testOutput" rows="12" spellcheck="false" readonly></textarea>
+        </label>
+      </div>
+      <div id="testSummary" class="test-summary"></div>
+    </section>
+
+    <section class="docs">
+      <h2>Cheat sheet</h2>
+      <div class="docs-grid">
+        <div>
+          <h3>URL patterns</h3>
+          <dl>
+            <dt><code>*</code> or empty</dt><dd>every request</dd>
+            <dt><code>/api/v1/users</code></dt><dd>substring match</dd>
+            <dt><code>https://x.com/api/*</code></dt><dd>glob, <code>*</code> is the wildcard</dd>
+            <dt><code>re:^https://api\.</code></dt><dd>regular expression</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Field paths</h3>
+          <dl>
+            <dt><code>test</code></dt><dd>top-level field</dd>
+            <dt><code>data.user.name</code></dt><dd>nested field</dd>
+            <dt><code>items[0].id</code></dt><dd>array index</dd>
+            <dt><code>items[*].active</code></dt><dd>every element</dd>
+            <dt><em>(empty)</em></dt><dd>the whole body</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Values</h3>
+          <p class="muted">
+            Values are JSON literals: <code>true</code>, <code>42</code>,
+            <code>"a string"</code> (with quotes), <code>{"a": 1}</code>,
+            <code>[]</code>, <code>null</code>.
+          </p>
+          <h3>Good to know</h3>
+          <p class="muted">
+            Only JSON bodies fetched by the page itself (<code>fetch</code> /
+            <code>XMLHttpRequest</code>) can be rewritten. Navigations, images and
+            documents are untouched, and the server still receives the real request.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <template id="ruleTemplate">
+    <article class="rule">
+      <div class="rule-head">
+        <label class="switch switch-sm" title="Enable this rule">
+          <input type="checkbox" data-field="enabled">
+          <span class="switch-track"></span>
+        </label>
+        <input type="text" class="rule-name" data-field="name" placeholder="Rule name">
+        <span class="rule-summary"></span>
+        <button class="icon-btn" data-action="duplicate" title="Duplicate">⧉</button>
+        <button class="icon-btn danger" data-action="delete" title="Delete">✕</button>
+        <button class="icon-btn" data-action="collapse" title="Collapse" aria-expanded="true">▾</button>
+      </div>
+
+      <div class="rule-body">
+        <div class="rule-match">
+          <label class="field field-narrow">
+            <span>Method</span>
+            <select data-field="method"></select>
+          </label>
+          <label class="field">
+            <span>URL pattern</span>
+            <input type="text" data-field="url" placeholder="https://api.example.com/v1/*" spellcheck="false">
+          </label>
+          <label class="field field-tiny">
+            <span>Status</span>
+            <input type="text" data-field="status" placeholder="—" inputmode="numeric" title="Optional: report this HTTP status instead of the real one">
+          </label>
+        </div>
+
+        <div class="mutations">
+          <div class="mutation-head">
+            <span></span><span>Action</span><span>Field path</span><span>Value (JSON)</span><span></span>
+          </div>
+          <div class="mutation-rows"></div>
+          <button class="btn btn-subtle" data-action="add-mutation">+ Add change</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <template id="mutationTemplate">
+    <div class="mutation">
+      <label class="switch switch-sm" title="Enable this change">
+        <input type="checkbox" data-field="enabled">
+        <span class="switch-track"></span>
+      </label>
+      <select data-field="op"></select>
+      <input type="text" data-field="path" placeholder="data.user.name" spellcheck="false">
+      <input type="text" data-field="value" placeholder="true" spellcheck="false">
+      <button class="icon-btn danger" data-action="delete-mutation" title="Remove">✕</button>
+    </div>
+  </template>
+
+  <script src="../engine.js"></script>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
