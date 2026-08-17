@@ -5,6 +5,7 @@
  * toolbar badge showing how many responses were rewritten in each tab.
  */
 import { DEFAULT_ENABLED, DEFAULT_RULES } from './defaults.js';
+import { planSeed } from './seed.mjs';
 
 const BADGE_COLOR = '#6366f1';
 const BADGE_COLOR_OFF = '#9ca3af';
@@ -13,32 +14,12 @@ const BADGE_COLOR_OFF = '#9ca3af';
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   const stored = await chrome.storage.local.get(['rules', 'enabled', 'seededIds']);
-  const seeded = new Set(Array.isArray(stored.seededIds) ? stored.seededIds : []);
-
-  if (details.reason === 'install' || !Array.isArray(stored.rules)) {
-    // Fresh install: ship everything, live immediately.
-    await chrome.storage.local.set({
-      rules: structuredClone(DEFAULT_RULES),
-      enabled: stored.enabled === undefined ? DEFAULT_ENABLED : stored.enabled,
-      seededIds: DEFAULT_RULES.map((rule) => rule.id),
-    });
-    return;
-  }
-
-  // Update: introduce defaults the user has never seen, without disturbing the
-  // ones they already have (or deliberately deleted).
-  const existing = new Set(stored.rules.map((rule) => rule.id));
-  const additions = DEFAULT_RULES.filter((rule) => !seeded.has(rule.id) && !existing.has(rule.id));
-
-  if (additions.length) {
-    await chrome.storage.local.set({
-      rules: stored.rules.concat(structuredClone(additions)),
-    });
-  }
-
-  await chrome.storage.local.set({
-    seededIds: [...new Set([...seeded, ...DEFAULT_RULES.map((rule) => rule.id)])],
-  });
+  await chrome.storage.local.set(planSeed({
+    reason: details.reason,
+    stored,
+    defaultRules: DEFAULT_RULES,
+    defaultEnabled: DEFAULT_ENABLED,
+  }));
 });
 
 // ------------------------------------------------------------ dev reload
