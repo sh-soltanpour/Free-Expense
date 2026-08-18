@@ -5,6 +5,8 @@ sees them. You give it a URL and a list of changes — *make `test` always
 `true`*, *set every `items[*].active` to `true`* — and the page receives the
 modified body as if the server had sent it.
 
+`Comes with a golden default rule that makes your expense recording easier :)`
+
 ## Install
 
 1. Download the `.zip` from [Releases](../../releases) and unzip it
